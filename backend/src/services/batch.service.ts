@@ -1,5 +1,5 @@
 import { db } from '../config/database';
-import { Batch } from '../../../shared/types';
+import { Batch } from '../shared/types';
 
 interface GetPendingBatchesParams {
   recycler_id?: number;
@@ -175,7 +175,7 @@ export class BatchService {
       const offset = (params.page - 1) * params.limit;
       
       let whereClause = 'WHERE b.recycler_id = $1';
-      const queryParams = [params.recycler_id];
+      const queryParams: any[] = [params.recycler_id];
       
       if (params.status) {
         whereClause += ' AND b.verification_status = $2';
@@ -199,7 +199,7 @@ export class BatchService {
         LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
       `;
 
-      queryParams.push(params.limit.toString(), offset.toString());
+      queryParams.push(params.limit, offset);
       
       const result = await db.query(query, queryParams);
       

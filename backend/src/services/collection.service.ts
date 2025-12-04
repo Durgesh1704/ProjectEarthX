@@ -1,5 +1,5 @@
 import { db } from '../config/database';
-import { Transaction } from '../../../shared/types';
+import { Transaction } from '../shared/types';
 
 interface RecordCollectionParams {
   citizen_id: number;
@@ -102,7 +102,7 @@ export class CollectionService {
       const offset = (params.page - 1) * params.limit;
       
       let whereClause = 'WHERE t.collector_id = $1';
-      const queryParams = [params.collector_id];
+      const queryParams: any[] = [params.collector_id];
       
       if (params.status) {
         whereClause += ' AND t.status = $2';
@@ -123,7 +123,7 @@ export class CollectionService {
         LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
       `;
 
-      queryParams.push(params.limit.toString(), offset.toString());
+      queryParams.push(params.limit, offset);
       
       const result = await db.query(query, queryParams);
       

@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { User, Transaction, Batch } from '../../../shared/types';
+import { Request } from 'express';
+import { User, Transaction, Batch } from '../shared/types';
 
 // Extended Request interface with authenticated user
 export interface AuthenticatedRequest extends Request {

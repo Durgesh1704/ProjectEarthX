@@ -14,23 +14,34 @@ import {
 } from './blockchain.types';
 
 export class BlockchainService {
-  private provider: ethers.JsonRpcProvider;
-  private wallet: ethers.Wallet;
-  private contract: ethers.Contract;
+  private provider!: ethers.JsonRpcProvider;
+  private wallet!: ethers.Wallet;
+  private contract!: ethers.Contract;
   private config: BlockchainConfig;
+  private initialized: boolean = false;
 
   constructor() {
     this.config = {
       rpcUrl: process.env.POLYGON_RPC_URL || 'https://rpc-amoy.polygon.technology',
       privateKey: process.env.POLYGON_PRIVATE_KEY || '',
-      contractAddress: process.env.POLYGON_CONTRACT_ADDRESS || '0x...', // Replace with actual contract address
+      contractAddress: process.env.POLYGON_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000',
       gasLimit: BLOCKCHAIN_CONSTANTS.GAS_LIMIT,
       maxRetries: BLOCKCHAIN_CONSTANTS.MAX_RETRIES,
       retryDelay: BLOCKCHAIN_CONSTANTS.RETRY_DELAY,
       confirmations: BLOCKCHAIN_CONSTANTS.CONFIRMATIONS
     };
 
-    this.initializeProvider();
+    // Only initialize if we have valid configuration
+    if (this.config.privateKey && this.config.privateKey.length > 10) {
+      try {
+        this.initializeProvider();
+        this.initialized = true;
+      } catch (error) {
+        console.warn('Blockchain service not initialized - missing configuration');
+      }
+    } else {
+      console.warn('Blockchain service not initialized - missing POLYGON_PRIVATE_KEY environment variable');
+    }
   }
 
   /**
@@ -60,6 +71,12 @@ export class BlockchainService {
    * CORE METHOD: Trigger mint for an approved batch
    */
   public async triggerMint(batchId: string): Promise<MintResult> {
+    if (!this.initialized) {
+      return {
+        success: false,
+        error: 'Blockchain service not initialized. Please configure POLYGON_PRIVATE_KEY environment variable.'
+      };
+    }
     let retryCount = 0;
     let lastError: Error | null = null;
 

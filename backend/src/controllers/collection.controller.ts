@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthenticatedRequest, RecordCollectionRequest, RecordCollectionResponse, COLLECTION_LIMITS } from './types';
 import { CollectionService } from '../services/collection.service';
-import { UserRole } from '../../../shared/types';
+import { UserRole } from '../shared/types';
 
 export class CollectionController {
   private collectionService: CollectionService;

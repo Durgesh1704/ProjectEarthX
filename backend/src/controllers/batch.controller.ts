@@ -3,7 +3,7 @@ import { AuthenticatedRequest, VerifyBatchRequest, VerifyBatchResponse } from '.
 import { VerificationService } from '../services/verification.service';
 import { BatchService } from '../services/batch.service';
 import { BlockchainService } from '../services/blockchain.service';
-import { UserRole } from '../../../shared/types';
+import { UserRole } from '../shared/types';
 
 export class BatchController {
   private verificationService: VerificationService;
@@ -88,7 +88,7 @@ export class BatchController {
                            verificationResult.status === 'FLAGGED' ? 'pending' : 'rejected',
         rejection_reason: verificationResult.status === 'REJECTED' ? verificationResult.message : undefined,
         weight_difference_percentage: verificationResult.weightDifferencePercentage,
-        blockchain_batch_id: verificationResult.status === 'APPROVED' ? this.generateBlockchainBatchId() : null
+        blockchain_batch_id: verificationResult.status === 'APPROVED' ? this.generateBlockchainBatchId() : undefined
       });
 
       // Log the verification action
@@ -112,7 +112,7 @@ export class BatchController {
         
         try {
           // Trigger mint asynchronously (don't block the response)
-          this.triggerMintAsync(batch_id);
+          this.triggerMintAsync(batch_id.toString());
           mintResult = {
             status: 'INITIATED',
             message: 'Minting process initiated. Check batch status for updates.'
@@ -130,10 +130,16 @@ export class BatchController {
         success: true,
         data: {
           batch: updatedBatch,
-          verification_result: verificationResult,
+          verification_result: {
+            status: verificationResult.status,
+            weight_difference_percentage: verificationResult.weightDifferencePercentage,
+            original_weight: verificationResult.originalWeight,
+            verified_weight: verificationResult.verifiedWeight,
+            message: verificationResult.message
+          },
           mint_result: mintResult
         }
-      } as VerifyBatchResponse);
+      });
 
     } catch (error) {
       console.error('Error in verifyBatch:', error);
